@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 测评系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .tab-active {
+            border-bottom: 2px solid #3B82F6;
+            color: #3B82F6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="index.html" class="text-2xl font-bold text-blue-600">
+                        <i class="fas fa-brain mr-2"></i>测评系统
+                    </a>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="index.html" class="text-gray-600 hover:text-blue-600 transition-colors">首页</a>
+                        <a href="assessment-center.html" class="text-gray-600 hover:text-blue-600 transition-colors">测评中心</a>
+                        <a href="profile.html" class="text-blue-600 font-medium">个人中心</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" 
+                             alt="用户头像" class="w-10 h-10 rounded-full">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">张三</p>
+                            <!-- 移除VIP会员显示 -->
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- 侧边栏 -->
+            <div class="lg:col-span-1">
+                <!-- 用户信息卡片 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <div class="text-center">
+                        <div class="relative inline-block">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" 
+                                 alt="用户头像" class="w-20 h-20 rounded-full mx-auto mb-4 cursor-pointer" 
+                                 onclick="changeAvatar()" id="userAvatar">
+                            <div class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer" 
+                                 onclick="changeAvatar()" title="更换头像">
+                                <i class="fas fa-camera text-xs"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">张三</h3>
+                        <p class="text-sm text-gray-500">138****8888</p>
+                        <!-- 移除VIP会员标签 -->
+                    </div>
+                </div>
+                
+                <!-- 侧边栏导航 - 修正：将导航移到用户信息卡片外部 -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <nav class="space-y-2">
+                        <a href="#" class="tab-link flex items-center space-x-3 px-4 py-3 rounded-lg text-blue-600 bg-blue-50" data-tab="history" onclick="showTab('history')">
+                            <i class="fas fa-history"></i>
+                            <span>测评记录</span>
+                        </a>
+                        <a href="#" class="tab-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50" data-tab="orders" onclick="showTab('orders')">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>购买记录</span>
+                        </a>
+                        <a href="#" class="tab-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50" data-tab="settings" onclick="showTab('settings')">
+                            <i class="fas fa-cog"></i>
+                            <span>个人设置</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- 主内容区 -->
+            <div class="lg:col-span-3">  <!-- 修改：将col-span-2改为col-span-3以占据更多空间 -->
+                <!-- 测评记录页面 -->
+                <div id="history-tab" class="tab-content">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold">测评记录</h3>
+                            <div class="flex space-x-2">
+                                <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                    <option>全部类型</option>
+                                    <option>霍兰德测试</option>
+                                    <option>MBTI测试</option>
+                                    <option>九型人格</option>
+                                </select>
+                                <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                    <option>全部状态</option>
+                                    <option>已付费</option>
+                                    <option>精简版</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- 保留测评记录表格内容 -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500">测评类型</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500">测评时间</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500">核心类型</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500">状态</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="py-4 px-4">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="bg-blue-100 p-2 rounded-lg">
+                                                    <i class="fas fa-briefcase text-blue-600"></i>
+                                                </div>
+                                                <span class="font-medium">霍兰德职业兴趣测试</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4 text-gray-600">2024-01-15 14:30</td>
+                                        <td class="py-4 px-4">
+                                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">RIA</span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">已付费</span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <div class="flex space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800 text-sm">
+                                                    <i class="fas fa-eye mr-1"></i>查看报告
+                                                </button>
+                                                <button class="text-green-600 hover:text-green-800 text-sm">
+                                                    <i class="fas fa-download mr-1"></i>下载PDF
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="py-4 px-4">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="bg-purple-100 p-2 rounded-lg">
+                                                    <i class="fas fa-user text-purple-600"></i>
+                                                </div>
+                                                <span class="font-medium">MBTI性格测试</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4 text-gray-600">2024-01-12 09:15</td>
+                                        <td class="py-4 px-4">
+                                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">ENFP</span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm">精简版</span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <div class="flex space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800 text-sm">
+                                                    <i class="fas fa-eye mr-1"></i>查看报告
+                                                </button>
+                                                <button class="text-orange-600 hover:text-orange-800 text-sm">
+                                                    <i class="fas fa-unlock mr-1"></i>解锁完整版
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 购买记录页面 -->
+                <div id="orders-tab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold">购买记录</h3>
+                            <div class="flex space-x-2">
+                                <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                    <option>全部状态</option>
+                                    <option>已支付</option>
+                                    <option>待支付</option>
+                                    <option>已取消</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div>
+                                        <h4 class="font-medium">订单号：202401150001</h4>
+                                        <p class="text-sm text-gray-500">2024-01-15 14:35</p>
+                                    </div>
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">已支付</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-600">霍兰德职业兴趣测试 - 详细报告</p>
+                                        <p class="text-sm text-gray-500">支付方式：微信支付</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-lg font-semibold text-gray-900">¥19.9</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div>
+                                        <h4 class="font-medium">订单号：202401120002</h4>
+                                        <p class="text-sm text-gray-500">2024-01-12 16:20</p>
+                                    </div>
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">已支付</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-600">MBTI性格测试 - 详细报告</p>
+                                        <p class="text-sm text-gray-500">支付方式：支付宝</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-lg font-semibold text-gray-900">¥24.9</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 个人设置页面 -->
+                <div id="settings-tab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold mb-6">个人设置</h3>
+                        <form class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">姓名</label>
+                                    <input type="text" value="张三" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">手机号</label>
+                                    <input type="tel" value="138****8888" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">性别</label>
+                                    <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option>男</option>
+                                        <option>女</option>
+                                        <option>不愿透露</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">年龄</label>
+                                    <input type="number" value="28" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">职业</label>
+                                    <input type="text" value="软件工程师" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">学历</label>
+                                    <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option>高中及以下</option>
+                                        <option>大专</option>
+                                        <option>本科</option>
+                                        <option>硕士</option>
+                                        <option>博士</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex justify-end space-x-4">
+                                <button type="button" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                    取消
+                                </button>
+                                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                    保存修改
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 标签页切换
+        function showTab(tabName) {
+            // 隐藏所有标签页内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // 显示选中的标签页
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // 更新导航样式
+            document.querySelectorAll('.tab-link').forEach(link => {
+                link.classList.remove('text-blue-600', 'bg-blue-50');
+                link.classList.add('text-gray-600');
+            });
+            
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('text-blue-600', 'bg-blue-50');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.remove('text-gray-600');
+        }
+
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('userData');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // 更换头像功能
+        function changeAvatar() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const avatarImg = document.getElementById('userAvatar');
+                        const navAvatar = document.querySelector('nav img[alt="用户头像"]');
+                        
+                        avatarImg.src = e.target.result;
+                        navAvatar.src = e.target.result;
+                        
+                        // 保存到本地存储
+                        localStorage.setItem('userAvatar', e.target.result);
+                        
+                        // 这里可以添加上传到服务器的逻辑
+                        console.log('头像已更新');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        }
+
+        // 页面初始化时加载保存的头像
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedAvatar = localStorage.getItem('userAvatar');
+            if (savedAvatar) {
+                const avatarImg = document.getElementById('userAvatar');
+                const navAvatar = document.querySelector('nav img[alt="用户头像"]');
+                if (avatarImg) avatarImg.src = savedAvatar;
+                if (navAvatar) navAvatar.src = savedAvatar;
+            }
+            
+            // 默认显示测评记录页面
+            showTab('history');
+        });
+    </script>
+</body>
+</html>
+

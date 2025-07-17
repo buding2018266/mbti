@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测评历史 - 多类型测评系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            min-width: 150px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .dropdown a:hover {
+            background: #f8f9fa;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .filter-select, .filter-input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 1.5rem;
+        }
+
+        .filter-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .history-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .history-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .test-type {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .test-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .test-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .test-result {
+            font-size: 1.1rem;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .test-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.2rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: white;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+
+        .start-test-btn {
+            background: white;
+            color: #667eea;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid #28a745;
+        }
+
+        .notification.error {
+            border-left: 4px solid #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .history-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .test-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-brain"></i> 测评系统
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="assessment-center.html">测评中心</a></li>
+                <li><a href="history.html" class="active">测评历史</a></li>
+                <li><a href="profile.html">个人中心</a></li>
+            </ul>
+            <div class="user-menu">
+                <div class="user-avatar" onclick="toggleDropdown()">
+                    <span id="userInitial">U</span>
+                </div>
+                <div class="dropdown" id="userDropdown">
+                    <a href="profile.html">个人资料</a>
+                    <a href="history.html">测评历史</a>
+                    <a href="#" onclick="logout()">退出登录</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="main-content">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1><i class="fas fa-history"></i> 测评历史</h1>
+            <p>查看您的所有测评记录和结果</p>
+        </div>
+
+        <!-- 筛选区域 -->
+        <div class="filter-section">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="testType">测评类型</label>
+                    <select id="testType" class="filter-select">
+                        <option value="">全部类型</option>
+                        <option value="holland">霍兰德职业兴趣</option>
+                        <option value="mbti">MBTI性格测试</option>
+                        <option value="enneagram">九型人格</option>
+                        <option value="eq">情商测评</option>
+                        <option value="leadership">领导力测评</option>
+                        <option value="innovation">创新思维</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="dateRange">时间范围</label>
+                    <select id="dateRange" class="filter-select">
+                        <option value="">全部时间</option>
+                        <option value="week">最近一周</option>
+                        <option value="month">最近一月</option>
+                        <option value="quarter">最近三月</option>
+                        <option value="year">最近一年</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="status">完成状态</label>
+                    <select id="status" class="filter-select">
+                        <option value="">全部状态</option>
+                        <option value="completed">已完成</option>
+                        <option value="incomplete">未完成</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="searchKeyword">搜索关键词</label>
+                    <input type="text" id="searchKeyword" class="filter-input" placeholder="搜索测评名称或结果">
+                </div>
+                <button class="filter-btn" onclick="applyFilters()">
+                    <i class="fas fa-search"></i> 筛选
+                </button>
+            </div>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="loadingState" class="loading" style="display: none;">
+            <i class="fas fa-spinner"></i>
+            <p>正在加载测评历史...</p>
+        </div>
+
+        <!-- 历史记录网格 -->
+        <div id="historyGrid" class="history-grid">
+            <!-- 历史记录卡片将通过JavaScript动态生成 -->
+        </div>
+
+        <!-- 空状态 -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>暂无测评记录</h3>
+            <p>您还没有完成任何测评，快去开始您的第一次测评吧！</p>
+            <button class="start-test-btn" onclick="window.location.href='assessment-center.html'">
+                开始测评
+            </button>
+        </div>
+
+        <!-- 分页 -->
+        <div id="pagination" class="pagination" style="display: none;">
+            <button class="page-btn" id="prevBtn" onclick="changePage(-1)">
+                <i class="fas fa-chevron-left"></i> 上一页
+            </button>
+            <span id="pageInfo">第 1 页，共 1 页</span>
+            <button class="page-btn" id="nextBtn" onclick="changePage(1)">
+                下一页 <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- 通知提示 -->
+    <div id="notification" class="notification">
+        <div id="notificationContent"></div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentPage = 1;
+        let totalPages = 1;
+        let historyData = [];
+        let filteredData = [];
+        const itemsPerPage = 9;
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus();
+            loadHistoryData();
+        });
+
+        // 检查登录状态
+        function checkLoginStatus() {
+            const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (!user.username) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            document.getElementById('userInitial').textContent = user.username.charAt(0).toUpperCase();
+        }
+
+        // 加载历史数据
+        function loadHistoryData() {
+            showLoading(true);
+            
+            // 模拟从localStorage或API加载数据
+            setTimeout(() => {
+                const savedHistory = JSON.parse(localStorage.getItem('testHistory') || '[]');
+                historyData = savedHistory.length > 0 ? savedHistory : generateMockData();
+                filteredData = [...historyData];
+                
+                displayHistoryData();
+                showLoading(false);
+            }, 1000);
+        }
+
+        // 生成模拟数据
+        function generateMockData() {
+            const mockData = [
+                {
+                    id: '1',
+                    type: 'holland',
+                    title: '霍兰德职业兴趣测试',
+                    result: 'RIA型 (现实-研究-艺术)',
+                    score: 85,
+                    completedAt: '2024-01-15 14:30:00',
+                    duration: 18,
+                    questions: 60,
+                    status: 'completed'
+                },
+                {
+                    id: '2',
+                    type: 'mbti',
+                    title: 'MBTI性格测试',
+                    result: 'INTJ (建筑师)',
+                    score: 92,
+                    completedAt: '2024-01-10 09:15:00',
+                    duration: 22,
+                    questions: 93,
+                    status: 'completed'
+                },
+                {
+                    id: '3',
+                    type: 'enneagram',
+                    title: '九型人格测试',
+                    result: '5号 (观察者)',
+                    score: 88,
+                    completedAt: '2024-01-05 16:45:00',
+                    duration: 25,
+                    questions: 108,
+                    status: 'completed'
+                },
+                {
+                    id: '4',
+                    type: 'holland',
+                    title: '霍兰德职业兴趣测试',
+                    result: '进行中...',
+                    score: 0,
+                    completedAt: '2024-01-20 10:00:00',
+                    duration: 0,
+                    questions: 60,
+                    status: 'incomplete'
+                }
+            ];
+            
+            localStorage.setItem('testHistory', JSON.stringify(mockData));
+            return mockData;
+        }
+
+        // 显示历史数据
+        function displayHistoryData() {
+            const grid = document.getElementById('historyGrid');
+            const emptyState = document.getElementById('emptyState');
+            const pagination = document.getElementById('pagination');
+            
+            if (filteredData.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            // 计算分页
+            totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+            
+            // 生成卡片HTML
+            grid.innerHTML = pageData.map(item => createHistoryCard(item)).join('');
+            
+            // 更新分页
+            updatePagination();
+        }
+
+        // 创建历史记录卡片
+        function createHistoryCard(item) {
+            const typeNames = {
+                'holland': '霍兰德',
+                'mbti': 'MBTI',
+                'enneagram': '九型人格',
+                'eq': '情商测评',
+                'leadership': '领导力',
+                'innovation': '创新思维'
+            };
+            
+            const statusClass = item.status === 'completed' ? 'completed' : 'incomplete';
+            const actionButtons = item.status === 'completed' ? 
+                `<button class="action-btn btn-primary" onclick="viewResult('${item.id}')">
+                    <i class="fas fa-eye"></i> 查看报告
+                </button>
+                <button class="action-btn btn-secondary" onclick="downloadReport('${item.id}')">
+                    <i class="fas fa-download"></i> 下载
+                </button>
+                <button class="action-btn btn-danger" onclick="deleteRecord('${item.id}')">
+                    <i class="fas fa-trash"></i> 删除
+                </button>` :
+                `<button class="action-btn btn-primary" onclick="continueTest('${item.id}')">
+                    <i class="fas fa-play"></i> 继续测评
+                </button>
+                <button class="action-btn btn-danger" onclick="deleteRecord('${item.id}')">
+                    <i class="fas fa-trash"></i> 删除
+                </button>`;
+            
+            return `
+                <div class="history-card ${statusClass}">
+                    <div class="card-header">
+                        <span class="test-type">${typeNames[item.type] || item.type}</span>
+                        <span class="test-date">${formatDate(item.completedAt)}</span>
+                    </div>
+                    <div class="test-title">${item.title}</div>
+                    <div class="test-result">${item.result}</div>
+                    <div class="test-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">${item.score}%</div>
+                            <div class="stat-label">匹配度</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${item.duration}</div>
+                            <div class="stat-label">用时(分钟)</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${item.questions}</div>
+                            <div class="stat-label">题目数</div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        ${actionButtons}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (days === 0) {
+                return '今天';
+            } else if (days === 1) {
+                return '昨天';
+            } else if (days < 7) {
+                return `${days}天前`;
+            } else {
+                return date.toLocaleDateString('zh-CN');
+            }
+        }
+
+        // 应用筛选
+        function applyFilters() {
+            const testType = document.getElementById('testType').value;
+            const dateRange = document.getElementById('dateRange').value;
+            const status = document.getElementById('status').value;
+            const keyword = document.getElementById('searchKeyword').value.toLowerCase();
+            
+            filteredData = historyData.filter(item => {
+                // 类型筛选
+                if (testType && item.type !== testType) return false;
+                
+                // 状态筛选
+                if (status && item.status !== status) return false;
+                
+                // 关键词搜索
+                if (keyword && !item.title.toLowerCase().includes(keyword) && 
+                    !item.result.toLowerCase().includes(keyword)) return false;
+                
+                // 时间范围筛选
+                if (dateRange) {
+                    const itemDate = new Date(item.completedAt);
+                    const now = new Date();
+                    const diffDays = (now - itemDate) / (1000 * 60 * 60 * 24);
+                    
+                    switch (dateRange) {
+                        case 'week':
+                            if (diffDays > 7) return false;
+                            break;
+                        case 'month':
+                            if (diffDays > 30) return false;
+                            break;
+                        case 'quarter':
+                            if (diffDays > 90) return false;
+                            break;
+                        case 'year':
+                            if (diffDays > 365) return false;
+                            break;
+                    }
+                }
+                
+                return true;
+            });
+            
+            currentPage = 1;
+            displayHistoryData();
+        }
+
+        // 更新分页
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            pagination.style.display = 'flex';
+            pageInfo.textContent = `第 ${currentPage} 页，共 ${totalPages} 页`;
+            
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+        }
+
+        // 切换页面
+        function changePage(direction) {
+            const newPage = currentPage + direction;
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                displayHistoryData();
+            }
+        }
+
+        // 查看测评结果
+        function viewResult(id) {
+            const item = historyData.find(h => h.id === id);
+            if (!item) return;
+            
+            const resultPages = {
+                'holland': 'holland-result.html',
+                'mbti': 'mbti-result.html',
+                'enneagram': 'enneagram-result.html'
+            };
+            
+            const resultPage = resultPages[item.type];
+            if (resultPage) {
+                window.location.href = `${resultPage}?id=${id}`;
+            } else {
+                showNotification('该测评类型的结果页面正在开发中', 'error');
+            }
+        }
+
+        // 继续测评
+        function continueTest(id) {
+            const item = historyData.find(h => h.id === id);
+            if (!item) return;
+            
+            const testPages = {
+                'holland': 'holland-test.html',
+                'mbti': 'mbti-test.html',
+                'enneagram': 'enneagram-test.html'
+            };
+            
+            const testPage = testPages[item.type];
+            if (testPage) {
+                window.location.href = `${testPage}?continue=${id}`;
+            } else {
+                showNotification('该测评类型正在开发中', 'error');
+            }
+        }
+
+        // 下载报告
+        function downloadReport(id) {
+            const item = historyData.find(h => h.id === id);
+            if (!item) return;
+            
+            showNotification('正在生成PDF报告...', 'success');
+            
+            // 模拟下载过程
+            setTimeout(() => {
+                // 这里应该调用实际的PDF生成和下载逻辑
+                const link = document.createElement('a');
+                link.href = '#'; // 实际应该是PDF文件的URL
+                link.download = `${item.title}_${item.id}.pdf`;
+                // link.click();
+                
+                showNotification('报告下载完成', 'success');
+            }, 2000);
+        }
+
+        // 删除记录
+        function deleteRecord(id) {
+            if (!confirm('确定要删除这条测评记录吗？删除后无法恢复。')) {
+                return;
+            }
+            
+            historyData = historyData.filter(h => h.id !== id);
+            localStorage.setItem('testHistory', JSON.stringify(historyData));
+            
+            // 重新应用筛选
+            applyFilters();
+            
+            showNotification('记录删除成功', 'success');
+        }
+
+        // 显示/隐藏加载状态
+        function showLoading(show) {
+            const loading = document.getElementById('loadingState');
+            const grid = document.getElementById('historyGrid');
+            
+            if (show) {
+                loading.style.display = 'block';
+                grid.style.display = 'none';
+            } else {
+                loading.style.display = 'none';
+                grid.style.display = 'grid';
+            }
+        }
+
+        // 切换用户菜单
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (!userMenu.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const content = document.getElementById('notificationContent');
+            
+            content.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.key === 'f') {
+                event.preventDefault();
+                document.getElementById('searchKeyword').focus();
+            }
+        });
+
+        // 回车搜索
+        document.getElementById('searchKeyword').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                applyFilters();
+            }
+        });
+    </script>
+</body>
+</html>

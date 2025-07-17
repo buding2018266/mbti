@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>霍兰德职业兴趣测试 - 测评系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .question-card {
+            transition: all 0.3s ease;
+        }
+        .option-btn {
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover {
+            transform: translateY(-2px);
+        }
+        .option-btn.selected {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="index.html" class="text-2xl font-bold text-blue-600">
+                        <i class="fas fa-brain mr-2"></i>测评系统
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">霍兰德职业兴趣测试</span>
+                    <button onclick="exitTest()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 进度条 -->
+    <div class="bg-white border-b">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-gray-600">测评进度</span>
+                <span class="text-sm text-gray-600" id="progressText">1 / 60</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-blue-600 h-2 rounded-full progress-bar" id="progressBar" style="width: 1.67%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 测评内容 -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- 引导页 -->
+            <div id="guidePage" class="bg-white rounded-xl shadow-lg p-8 text-center">
+                <div class="mb-6">
+                    <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-briefcase text-3xl text-blue-600"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">霍兰德职业兴趣测试</h1>
+                    <p class="text-gray-600">探索您的职业兴趣倾向，发现最适合的职业方向</p>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">测评说明</h3>
+                    <div class="text-left space-y-3 text-sm text-gray-600">
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-clock text-blue-600 mt-1"></i>
+                            <span>预计用时：15-20分钟</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-question-circle text-blue-600 mt-1"></i>
+                            <span>题目数量：60题</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-heart text-blue-600 mt-1"></i>
+                            <span>请根据您的真实感受作答，没有标准答案</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-save text-blue-600 mt-1"></i>
+                            <span>系统会自动保存您的答题进度</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button onclick="startTest()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                    开始测评
+                </button>
+            </div>
+
+            <!-- 测评题目 -->
+            <div id="testPage" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8 question-card">
+                    <div class="mb-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-2" id="questionTitle">题目标题</h2>
+                        <p class="text-gray-600" id="questionContent">题目内容</p>
+                    </div>
+                    
+                    <div class="space-y-3" id="optionsContainer">
+                        <!-- 选项将通过JavaScript动态生成 -->
+                    </div>
+                    
+                    <div class="flex justify-between mt-8">
+                        <button onclick="previousQuestion()" id="prevBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-chevron-left mr-2"></i>上一题
+                        </button>
+                        <button onclick="nextQuestion()" id="nextBtn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            下一题<i class="fas fa-chevron-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 提交确认页 -->
+            <div id="submitPage" class="hidden bg-white rounded-xl shadow-lg p-8 text-center">
+                <div class="mb-6">
+                    <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check text-3xl text-green-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">测评完成</h2>
+                    <p class="text-gray-600">您已完成所有题目，点击提交查看结果</p>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">已答题目：</span>
+                            <span class="font-semibold" id="answeredCount">60</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">未答题目：</span>
+                            <span class="font-semibold" id="unansweredCount">0</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">用时：</span>
+                            <span class="font-semibold" id="timeUsed">18分32秒</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">完成度：</span>
+                            <span class="font-semibold text-green-600">100%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center space-x-4">
+                    <button onclick="backToTest()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        返回检查
+                    </button>
+                    <button onclick="submitTest()" class="px-8 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        提交测评
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 测评数据
+        const testData = {
+            questions: [
+                {
+                    id: 1,
+                    title: "第1题",
+                    content: "您是否喜欢使用工具、机器或设备进行工作？",
+                    type: "R"
+                },
+                {
+                    id: 2,
+                    title: "第2题",
+                    content: "您是否喜欢进行科学研究或实验？",
+                    type: "I"
+                },
+                {
+                    id: 3,
+                    title: "第3题",
+                    content: "您是否喜欢绘画、音乐或其他艺术创作？",
+                    type: "A"
+                },
+                // 这里应该有60道题，为了演示只列出前3题
+            ],
+            options: [
+                { value: 3, text: "非常喜欢" },
+                { value: 2, text: "比较喜欢" },
+                { value: 1, text: "一般" },
+                { value: 0, text: "不喜欢" }
+            ]
+        };
+
+        let currentQuestion = 0;
+        let answers = {};
+        let startTime = null;
+
+        // 开始测评
+        function startTest() {
+            document.getElementById('guidePage').classList.add('hidden');
+            document.getElementById('testPage').classList.remove('hidden');
+            startTime = new Date();
+            showQuestion(0);
+        }
+
+        // 显示题目
+        function showQuestion(index) {
+            if (index >= testData.questions.length) {
+                showSubmitPage();
+                return;
+            }
+
+            currentQuestion = index;
+            const question = testData.questions[index];
+            
+            document.getElementById('questionTitle').textContent = question.title;
+            document.getElementById('questionContent').textContent = question.content;
+            
+            // 生成选项
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            testData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-btn w-full p-4 border border-gray-300 rounded-lg text-left hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500';
+                button.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span>${option.text}</span>
+                        <div class="w-4 h-4 border border-gray-400 rounded-full"></div>
+                    </div>
+                `;
+                button.onclick = () => selectOption(question.id, option.value, button);
+                
+                // 如果已经选择过，显示选中状态
+                if (answers[question.id] === option.value) {
+                    button.classList.add('selected');
+                }
+                
+                optionsContainer.appendChild(button);
+            });
+            
+            // 更新进度
+            updateProgress();
+            
+            // 更新按钮状态 - 默认禁用下一题按钮，只有选择后才启用
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = !answers[question.id]; // 关键修改：默认禁用
+        }
+
+        // 选择选项
+        function selectOption(questionId, value, button) {
+            // 移除其他选项的选中状态
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 添加当前选项的选中状态
+            button.classList.add('selected');
+            
+            // 保存答案
+            answers[questionId] = value;
+            
+            // 启用下一题按钮
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        // 上一题
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                showQuestion(currentQuestion - 1);
+            }
+        }
+
+        // 下一题
+        function nextQuestion() {
+            if (currentQuestion < testData.questions.length - 1) {
+                showQuestion(currentQuestion + 1);
+            } else {
+                showSubmitPage();
+            }
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / testData.questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `${currentQuestion + 1} / ${testData.questions.length}`;
+        }
+
+        // 显示提交页面
+        function showSubmitPage() {
+            document.getElementById('testPage').classList.add('hidden');
+            document.getElementById('submitPage').classList.remove('hidden');
+            
+            const answeredCount = Object.keys(answers).length;
+            const unansweredCount = testData.questions.length - answeredCount;
+            
+            document.getElementById('answeredCount').textContent = answeredCount;
+            document.getElementById('unansweredCount').textContent = unansweredCount;
+            
+            if (startTime) {
+                const timeUsed = Math.floor((new Date() - startTime) / 1000);
+                const minutes = Math.floor(timeUsed / 60);
+                const seconds = timeUsed % 60;
+                document.getElementById('timeUsed').textContent = `${minutes}分${seconds}秒`;
+            }
+        }
+
+        // 返回测评
+        function backToTest() {
+            document.getElementById('submitPage').classList.add('hidden');
+            document.getElementById('testPage').classList.remove('hidden');
+            showQuestion(currentQuestion);
+        }
+
+        // 提交测评
+        function submitTest() {
+            // 这里应该将答案提交到服务器
+            console.log('提交答案:', answers);
+            
+            // 跳转到结果页面
+            window.location.href = 'holland-result.html';
+        }
+
+        // 退出测评
+        function exitTest() {
+            if (confirm('确定要退出测评吗？您的答题进度将会丢失。')) {
+                window.location.href = 'assessment-center.html';
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 可以从本地存储恢复答题进度
+            const savedAnswers = localStorage.getItem('holland_answers');
+            if (savedAnswers) {
+                answers = JSON.parse(savedAnswers);
+            }
+        });
+
+        // 定期保存答题进度
+        setInterval(() => {
+            localStorage.setItem('holland_answers', JSON.stringify(answers));
+        }, 5000);
+    </script>
+</body>
+</html>

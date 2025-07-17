@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI性格测试 - 测评中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .question-card {
+            transition: all 0.3s ease;
+        }
+        .option-button {
+            transition: all 0.2s ease;
+        }
+        .option-button:hover {
+            transform: translateY(-2px);
+        }
+        .option-button.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <h1 class="text-xl font-semibold text-gray-900">MBTI性格测试</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-500">
+                        <span id="currentQuestion">1</span> / <span id="totalQuestions">93</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 进度条 -->
+    <div class="bg-white border-b">
+        <div class="container mx-auto px-4">
+            <div class="py-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-purple-600">测评进度</span>
+                    <span class="text-sm text-gray-500" id="progressText">1%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-purple-600 h-2 rounded-full progress-bar" id="progressBar" style="width: 1%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- 测评说明 -->
+        <div id="instructionCard" class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="text-center">
+                <div class="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-brain text-3xl text-purple-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">MBTI性格测试</h2>
+                <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+                    MBTI性格测试是基于荣格心理类型理论开发的人格测评工具，通过四个维度的分析，帮助您了解自己的性格类型和行为偏好。
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">测评说明</h3>
+                        <ul class="text-sm text-gray-600 space-y-1 text-left">
+                            <li>• 共93道题目，预计用时20分钟</li>
+                            <li>• 每题选择更符合您的选项</li>
+                            <li>• 请根据真实感受作答</li>
+                            <li>• 没有标准答案，请放松心态</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">四个维度</h3>
+                        <ul class="text-sm text-gray-600 space-y-1 text-left">
+                            <li>• 外向(E) vs 内向(I)</li>
+                            <li>• 感觉(S) vs 直觉(N)</li>
+                            <li>• 思考(T) vs 情感(F)</li>
+                            <li>• 判断(J) vs 知觉(P)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <button onclick="startTest()" class="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                    开始测评
+                </button>
+            </div>
+        </div>
+
+        <!-- 测评题目 -->
+        <div id="questionCard" class="bg-white rounded-xl shadow-lg p-8 hidden">
+            <div class="mb-6">
+                <div class="text-sm text-purple-600 font-medium mb-2" id="questionCategory">外向性 vs 内向性</div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-4" id="questionText">
+                    在社交聚会中，您更倾向于：
+                </h3>
+            </div>
+            
+            <div class="space-y-4" id="optionsContainer">
+                <button class="option-button w-full p-6 border-2 border-gray-200 rounded-xl text-left hover:border-purple-300" 
+                        onclick="selectOption(0)" data-value="E">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold text-gray-900 mb-1">A. 主动与多人交谈</div>
+                            <div class="text-sm text-gray-600">我喜欢认识新朋友，与不同的人交流</div>
+                        </div>
+                        <div class="option-indicator hidden">
+                            <i class="fas fa-check-circle text-white"></i>
+                        </div>
+                    </div>
+                </button>
+                
+                <button class="option-button w-full p-6 border-2 border-gray-200 rounded-xl text-left hover:border-purple-300" 
+                        onclick="selectOption(1)" data-value="I">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold text-gray-900 mb-1">B. 与少数熟悉的人深入交谈</div>
+                            <div class="text-sm text-gray-600">我更喜欢与熟悉的朋友进行深度交流</div>
+                        </div>
+                        <div class="option-indicator hidden">
+                            <i class="fas fa-check-circle text-white"></i>
+                        </div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="flex justify-between mt-8">
+                <button onclick="previousQuestion()" id="prevBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50" disabled>
+                    <i class="fas fa-arrow-left mr-2"></i>上一题
+                </button>
+                <button onclick="nextQuestion()" id="nextBtn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50" disabled>
+                    下一题<i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 完成确认 -->
+        <div id="confirmCard" class="bg-white rounded-xl shadow-lg p-8 hidden">
+            <div class="text-center">
+                <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-check text-3xl text-green-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">测评完成</h2>
+                <p class="text-gray-600 mb-6">
+                    恭喜您完成了所有93道题目！系统正在分析您的答案，即将为您生成个性化的MBTI性格报告。
+                </p>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">答题用时：</span>
+                            <span class="font-semibold" id="testDuration">18分32秒</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">完成题目：</span>
+                            <span class="font-semibold">93/93</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button onclick="submitTest()" class="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                    查看我的性格类型
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 测评数据
+        const questions = [
+            {
+                category: "外向性 vs 内向性",
+                text: "在社交聚会中，您更倾向于：",
+                options: [
+                    { text: "A. 主动与多人交谈", desc: "我喜欢认识新朋友，与不同的人交流", value: "E" },
+                    { text: "B. 与少数熟悉的人深入交谈", desc: "我更喜欢与熟悉的朋友进行深度交流", value: "I" }
+                ]
+            },
+            {
+                category: "外向性 vs 内向性",
+                text: "当您需要充电恢复精力时，您会选择：",
+                options: [
+                    { text: "A. 与朋友出去活动", desc: "通过社交活动来恢复精力", value: "E" },
+                    { text: "B. 独自安静地休息", desc: "通过独处来恢复精力", value: "I" }
+                ]
+            },
+            {
+                category: "感觉 vs 直觉",
+                text: "在学习新知识时，您更喜欢：",
+                options: [
+                    { text: "A. 从具体的事实和细节开始", desc: "我喜欢循序渐进，从基础开始", value: "S" },
+                    { text: "B. 先了解整体概念和可能性", desc: "我喜欢先把握全局，再深入细节", value: "N" }
+                ]
+            },
+            {
+                category: "感觉 vs 直觉",
+                text: "在描述一个地方时，您更倾向于：",
+                options: [
+                    { text: "A. 详细描述具体的景象和感受", desc: "我会描述看到的、听到的、感受到的", value: "S" },
+                    { text: "B. 描述整体印象和可能的意义", desc: "我会描述这个地方给我的感觉和联想", value: "N" }
+                ]
+            },
+            {
+                category: "思考 vs 情感",
+                text: "在做重要决定时，您更依赖：",
+                options: [
+                    { text: "A. 逻辑分析和客观事实", desc: "我会理性分析利弊得失", value: "T" },
+                    { text: "B. 个人价值观和他人感受", desc: "我会考虑对自己和他人的影响", value: "F" }
+                ]
+            },
+            {
+                category: "思考 vs 情感",
+                text: "当朋友向您倾诉烦恼时，您更倾向于：",
+                options: [
+                    { text: "A. 分析问题并提供解决方案", desc: "我会帮助分析问题的原因和解决办法", value: "T" },
+                    { text: "B. 倾听并给予情感支持", desc: "我会理解和安慰，让朋友感受到支持", value: "F" }
+                ]
+            },
+            {
+                category: "判断 vs 知觉",
+                text: "对于日程安排，您更喜欢：",
+                options: [
+                    { text: "A. 提前制定详细计划", desc: "我喜欢有条理的安排和明确的时间表", value: "J" },
+                    { text: "B. 保持灵活，随机应变", desc: "我喜欢根据情况灵活调整计划", value: "P" }
+                ]
+            },
+            {
+                category: "判断 vs 知觉",
+                text: "在工作环境中，您更适应：",
+                options: [
+                    { text: "A. 明确的截止日期和结构化任务", desc: "我在有明确要求的环境中工作更高效", value: "J" },
+                    { text: "B. 灵活的时间安排和多样化任务", desc: "我在自由度高的环境中更有创造力", value: "P" }
+                ]
+            }
+            // 实际应用中这里应该有93道题目
+        ];
+
+        let currentQuestionIndex = 0;
+        let answers = [];
+        let startTime = Date.now();
+        let selectedOption = null;
+
+        function startTest() {
+            document.getElementById('instructionCard').classList.add('hidden');
+            document.getElementById('questionCard').classList.remove('hidden');
+            startTime = Date.now();
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            document.getElementById('questionCategory').textContent = question.category;
+            document.getElementById('questionText').textContent = question.text;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = questions.length;
+            
+            // 更新进度
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '%';
+            
+            // 更新选项
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-button w-full p-6 border-2 border-gray-200 rounded-xl text-left hover:border-purple-300';
+                button.onclick = () => selectOption(index);
+                button.setAttribute('data-value', option.value);
+                
+                button.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold text-gray-900 mb-1">${option.text}</div>
+                            <div class="text-sm text-gray-600">${option.desc}</div>
+                        </div>
+                        <div class="option-indicator hidden">
+                            <i class="fas fa-check-circle text-white"></i>
+                        </div>
+                    </div>
+                `;
+                
+                optionsContainer.appendChild(button);
+            });
+            
+            // 重置选择状态
+            selectedOption = null;
+            updateButtons();
+            
+            // 如果有之前的答案，恢复选择状态
+            if (answers[currentQuestionIndex] !== undefined) {
+                const answerValue = answers[currentQuestionIndex];
+                const buttons = optionsContainer.querySelectorAll('.option-button');
+                buttons.forEach((btn, index) => {
+                    if (btn.getAttribute('data-value') === answerValue) {
+                        selectOption(index);
+                    }
+                });
+            }
+        }
+
+        function selectOption(index) {
+            // 清除之前的选择
+            const buttons = document.querySelectorAll('.option-button');
+            buttons.forEach(btn => {
+                btn.classList.remove('selected');
+                btn.querySelector('.option-indicator').classList.add('hidden');
+            });
+            
+            // 选择当前选项
+            const selectedButton = buttons[index];
+            selectedButton.classList.add('selected');
+            selectedButton.querySelector('.option-indicator').classList.remove('hidden');
+            
+            selectedOption = selectedButton.getAttribute('data-value');
+            answers[currentQuestionIndex] = selectedOption;
+            
+            updateButtons();
+        }
+
+        function updateButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.disabled = selectedOption === null;
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.textContent = '完成测评';
+                nextBtn.innerHTML = '完成测评<i class="fas fa-check ml-2"></i>';
+            } else {
+                nextBtn.innerHTML = '下一题<i class="fas fa-arrow-right ml-2"></i>';
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (selectedOption === null) return;
+            
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            } else {
+                showConfirmation();
+            }
+        }
+
+        function showConfirmation() {
+            document.getElementById('questionCard').classList.add('hidden');
+            document.getElementById('confirmCard').classList.remove('hidden');
+            
+            // 计算用时
+            const duration = Date.now() - startTime;
+            const minutes = Math.floor(duration / 60000);
+            const seconds = Math.floor((duration % 60000) / 1000);
+            document.getElementById('testDuration').textContent = `${minutes}分${seconds}秒`;
+        }
+
+        function submitTest() {
+            // 计算MBTI类型
+            const result = calculateMBTI();
+            
+            // 保存结果
+            localStorage.setItem('mbtiResult', JSON.stringify({
+                type: result,
+                answers: answers,
+                duration: Date.now() - startTime,
+                date: new Date().toISOString()
+            }));
+            
+            // 跳转到结果页面
+            window.location.href = 'mbti-result.html';
+        }
+
+        function calculateMBTI() {
+            const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+            
+            answers.forEach(answer => {
+                if (answer) {
+                    scores[answer]++;
+                }
+            });
+            
+            const type = 
+                (scores.E > scores.I ? 'E' : 'I') +
+                (scores.S > scores.N ? 'S' : 'N') +
+                (scores.T > scores.F ? 'T' : 'F') +
+                (scores.J > scores.P ? 'J' : 'P');
+            
+            return type;
+        }
+
+        // 页面加载时的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查是否有保存的进度
+            const savedProgress = localStorage.getItem('mbtiProgress');
+            if (savedProgress) {
+                const progress = JSON.parse(savedProgress);
+                if (confirm('检测到未完成的测评，是否继续之前的进度？')) {
+                    currentQuestionIndex = progress.currentQuestion;
+                    answers = progress.answers;
+                    startTime = progress.startTime;
+                    startTest();
+                }
+            }
+        });
+
+        // 自动保存进度
+        setInterval(() => {
+            if (currentQuestionIndex > 0) {
+                localStorage.setItem('mbtiProgress', JSON.stringify({
+                    currentQuestion: currentQuestionIndex,
+                    answers: answers,
+                    startTime: startTime
+                }));
+            }
+        }, 10000); // 每10秒保存一次
+
+        // 页面离开时保存进度
+        window.addEventListener('beforeunload', function() {
+            if (currentQuestionIndex > 0 && currentQuestionIndex < questions.length) {
+                localStorage.setItem('mbtiProgress', JSON.stringify({
+                    currentQuestion: currentQuestionIndex,
+                    answers: answers,
+                    startTime: startTime
+                }));
+            }
+        });
+    </script>
+</body>
+</html>
